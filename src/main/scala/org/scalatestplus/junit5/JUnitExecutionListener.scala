@@ -15,23 +15,14 @@
  */
 package org.scalatestplus.junit5;
 
+import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.{TestExecutionListener, TestIdentifier}
-import org.junit.platform.engine.{EngineExecutionListener, TestDescriptor, TestExecutionResult}
-import org.scalatest.{Reporter, StatefulStatus, Tracker}
-import org.scalatest.events.{
-  MotionToSuppress,
-  SeeStackDepthException,
-  TestFailed,
-  TestIgnored,
-  TestStarting,
-  TestSucceeded,
-  TopOfMethod
-}
+import org.scalatest.events._
 import org.scalatest.exceptions.PayloadField
-import JUnitHelper.getIndentedTextForTest
+import org.scalatest.{Reporter, StatefulStatus, Tracker}
+import org.scalatestplus.junit5.JUnitHelper.getIndentedTextForTest
 
-import java.util.Collections
-import java.util.HashSet
+import java.util.{Collections, HashSet}
 import java.util.regex.Pattern
 
 private[junit5] class JUnitExecutionListener(

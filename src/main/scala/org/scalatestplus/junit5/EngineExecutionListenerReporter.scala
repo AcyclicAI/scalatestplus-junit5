@@ -54,8 +54,23 @@ private[junit5] class EngineExecutionListenerReporter(
       testName: String,
       locationOpt: Option[Location]
   ): ScalaTestDescriptor = {
-    val uniqueId = clzDesc.theUniqueId.append("test", testName)
-    new ScalaTestDescriptor(uniqueId, testName, locationOpt)
+
+    val qualifiedName = s"$suiteName - $testName"
+    if (suiteId.==(clzDesc.suiteClass.getName)) {
+      val uniqueId = clzDesc.theUniqueId.append("test", testName)
+
+      new ScalaTestDescriptor(uniqueId, qualifiedName, locationOpt)
+    } else {
+
+      val qualifier = suiteId.stripPrefix(clzDesc.suiteClass.getName)
+      // nested test case, demands a qualified name
+      val uniqueId = clzDesc.theUniqueId
+        .append("nested-class", qualifier)
+        .append("test", testName)
+
+      new ScalaTestDescriptor(uniqueId, qualifiedName, locationOpt)
+    }
+
   }
 
   override def apply(event: Event): Unit = {
@@ -76,7 +91,10 @@ private[junit5] class EngineExecutionListenerReporter(
             threadName,
             timeStamp
           ) =>
-        val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+
+        val testDesc: ScalaTestDescriptor =
+          createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+
         clzDesc.addChild(testDesc)
         listener.dynamicTestRegistered(testDesc)
         listener.executionStarted(testDesc)
@@ -100,8 +118,8 @@ private[junit5] class EngineExecutionListenerReporter(
             threadName,
             timeStamp
           ) =>
-        val throwableOrNull = throwable.orNull
         val testDesc = createTestDescriptor(suiteId, suiteName, suiteClassName, testName, location)
+        val throwableOrNull = throwable.orNull
         listener.executionFinished(testDesc, TestExecutionResult.failed(throwableOrNull))
 
       case TestSucceeded(
@@ -140,7 +158,7 @@ private[junit5] class EngineExecutionListenerReporter(
         listener.executionSkipped(testDesc, "Test ignored.")
 
       case TestCanceled(
-            ordering,
+            ordinal,
             message,
             suiteName,
             suiteId,

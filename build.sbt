@@ -1,11 +1,15 @@
 import java.io.PrintWriter
+import scala.collection.immutable.Seq
 import scala.io.Source
 
 name := "junit-5.13"
 
-organization := "ai.acyclic"
+organization := "ai.acyclic.scalatestplus"
 
-version := "3.2.20.0-SNAPSHOT"
+versionScheme := Some("semver-spec")
+
+version := "3.2.20.0"
+isSnapshot := true
 
 homepage := Some(url("https://github.com/acyclic-ai/scalatestplus-junit"))
 
@@ -83,7 +87,10 @@ pomPostProcess := { (node: XmlNode) =>
 }
 
 Test / testOptions :=
-  Seq(Tests.Argument(TestFrameworks.ScalaTest, "-m", "org.scalatestplus.junit5"))
+  Seq(
+    Tests.Argument(TestFrameworks.ScalaTest, "-m", "org.scalatestplus.junit5"),
+    Tests.Argument(TestFrameworks.ScalaTest, "-l", "org.scalatestplus.junit5.integration")
+  )
 
 Test / fork := true
 
@@ -111,28 +118,11 @@ OsgiKeys.additionalHeaders := Map(
   "Bundle-Vendor" -> "acyclic-ai"
 )
 
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  Some("publish-releases" at nexus + "service/local/staging/deploy/maven2")
-}
-
 publishMavenStyle := true
 
 Test / publishArtifact := false
 
 pomIncludeRepository := { _ => false }
-
-pomExtra := (
-  <scm>
-    <url>https://github.com/acyclic-ai/scalatestplus-junit5</url>
-    <connection>scm:git:git@github.com:acyclic-ai/scalatestplus-junit5.git</connection>
-    <developerConnection>
-      scm:git:git@github.com:acyclic-ai/scalatestplus-junit5.git
-    </developerConnection>
-  </scm>
-)
-
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 // Temporary disable publishing of doc in dotty, can't get it to build.
 //Compile / packageDoc / publishArtifact := !scalaBinaryVersion.value.startsWith("3")
