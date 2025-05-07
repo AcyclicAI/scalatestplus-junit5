@@ -1,11 +1,11 @@
 package org.scalatestplus.junit5
 
 import org.junit.platform.engine.UniqueId
-import org.junit.platform.engine.discovery.ClasspathRootSelector
 import org.junit.platform.engine.discovery.DiscoverySelectors.{selectClasspathRoots, selectPackage}
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request
 import org.scalatest.{BeforeAndAfterAll, funspec}
 import org.scalatestplus.junit5.helpers.HappySuite
+import org.scalatestplus.junit5.integration.PlainFixture
 
 import java.nio.file.{Files, Paths}
 import scala.collection.JavaConverters._

@@ -1,4 +1,5 @@
 import java.io.PrintWriter
+import scala.collection.immutable.Seq
 import scala.io.Source
 
 name := "junit-5.13"
@@ -82,8 +83,11 @@ pomPostProcess := { (node: XmlNode) =>
   }).transform(node).head
 }
 
-Test / testOptions :=
-  Seq(Tests.Argument(TestFrameworks.ScalaTest, "-m", "org.scalatestplus.junit5"))
+Test / testOptions := 
+  Seq(
+    Tests.Argument(TestFrameworks.ScalaTest, "-m", "org.scalatestplus.junit5"),
+    Tests.Argument(TestFrameworks.ScalaTest, "-l", "org.scalatestplus.junit5.integration")
+  )
 
 Test / fork := true
 
