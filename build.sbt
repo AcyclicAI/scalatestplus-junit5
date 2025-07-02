@@ -3,11 +3,11 @@ import scala.io.Source
 
 name := "junit-5.13"
 
-organization := "org.scalatestplus"
+organization := "ai.acyclic"
 
-version := "3.2.19.0"
+version := "3.2.20.0-SNAPSHOT"
 
-homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
+homepage := Some(url("https://github.com/acyclic-ai/scalatestplus-junit"))
 
 licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 
@@ -32,7 +32,8 @@ crossScalaVersions := List(
   "2.11.12",
   "2.12.20",
   "2.13.16",
-  "3.3.5"
+  "3.3.6",
+  "3.7.1"
 )
 
 scalacOptions ++= Seq("-target:jvm-1.8")
@@ -107,7 +108,7 @@ OsgiKeys.additionalHeaders := Map(
   "Bundle-Name" -> "ScalaTestPlusJUnit5",
   "Bundle-Description" -> "ScalaTest+JUnit5 is an open-source integration library between ScalaTest and JUnit 5 for Scala projects.",
   "Bundle-DocURL" -> "http://www.scalatest.org/",
-  "Bundle-Vendor" -> "Artima, Inc."
+  "Bundle-Vendor" -> "acyclic-ai"
 )
 
 publishTo := {
@@ -123,10 +124,10 @@ pomIncludeRepository := { _ => false }
 
 pomExtra := (
   <scm>
-    <url>https://github.com/scalatest/scalatestplus-junit5</url>
-    <connection>scm:git:git@github.com:scalatest/scalatestplus-junit5.git</connection>
+    <url>https://github.com/acyclic-ai/scalatestplus-junit5</url>
+    <connection>scm:git:git@github.com:acyclic-ai/scalatestplus-junit5.git</connection>
     <developerConnection>
-      scm:git:git@github.com:scalatest/scalatestplus-junit5.git
+      scm:git:git@github.com:acyclic-ai/scalatestplus-junit5.git
     </developerConnection>
   </scm>
 )
@@ -134,7 +135,12 @@ pomExtra := (
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 // Temporary disable publishing of doc in dotty, can't get it to build.
-Compile / packageDoc / publishArtifact := !scalaBinaryVersion.value.startsWith("3")
+//Compile / packageDoc / publishArtifact := !scalaBinaryVersion.value.startsWith("3")
+Compile / packageDoc / publishArtifact := true
+Compile / packageSrc / publishArtifact := true
+
+publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
+publishM2Configuration := publishM2Configuration.value.withOverwrite(true)
 
 def docTask(docDir: File, resDir: File, projectName: String): File = {
   val docLibDir = docDir / "lib"
@@ -162,7 +168,7 @@ def docTask(docDir: File, resDir: File, projectName: String): File = {
   docDir
 }
 
-Compile / doc := docTask((Compile / doc).value, (Compile / sourceDirectory).value, name.value)
+//Compile / doc := docTask((Compile / doc).value, (Compile / sourceDirectory).value, name.value)
 
 Compile / doc / scalacOptions := Seq(
   "-doc-title",
