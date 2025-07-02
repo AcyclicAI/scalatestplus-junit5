@@ -14,11 +14,11 @@ dependencies {
     testImplementation("org.scalatest:scalatest_3:3.2.19")
     testRuntimeOnly("org.junit.platform:junit-platform-engine:1.13.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.1")
-    testRuntimeOnly("org.scalatestplus:junit-5-13_3:3.2.19.0")
+    testRuntimeOnly("org.scalatestplus:junit-5-13_3:3.2.20.0-SNAPSHOT")
 }
 
 tasks {
-    test{
+    test {
         useJUnitPlatform {
             includeEngines("scalatest")
             testLogging {

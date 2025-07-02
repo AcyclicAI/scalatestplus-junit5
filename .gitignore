@@ -1,9 +1,13 @@
 *.class
 *.log
 target/
-.idea/
 test-output/
 _site/
-.bsp/
 build/
+bin/
+.idea/
+.vscode/
+.bsp/
 .gradle/
+.metals/
+.bloop/
