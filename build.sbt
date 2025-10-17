@@ -5,7 +5,7 @@ name := "junit-5.13"
 
 organization := "org.scalatestplus"
 
-version := "3.2.19.0"
+version := "3.3.0.0-alpha.2"
 
 homepage := Some(url("https://github.com/scalatest/scalatestplus-junit"))
 
@@ -46,7 +46,7 @@ Compile / unmanagedSourceDirectories ++= {
   }
 }
 
-val scalatestVersion = "3.2.19"
+val scalatestVersion = "3.3.0-alpha.2"
 val junitVersion = "5.13.1"
 val junitEngineVersion = "1.13.1"
 
@@ -110,10 +110,7 @@ OsgiKeys.additionalHeaders:= Map(
   "Bundle-Vendor" -> "Artima, Inc."
 )
 
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  Some("publish-releases" at nexus + "service/local/staging/deploy/maven2")
-}
+publishTo := localStaging.value
 
 publishMavenStyle := true
 
