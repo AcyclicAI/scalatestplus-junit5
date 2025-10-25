@@ -108,7 +108,7 @@ class IntegrationTests extends funspec.AnyFunSpec with BeforeAndAfterAll with Be
               "-s",
               clzName,
               "-C",
-              classOf[ScalaTestListener].getCanonicalName
+              classOf[ScalaTestListener].getName
               //            "-oN"
             )
           )
@@ -142,7 +142,7 @@ class IntegrationTests extends funspec.AnyFunSpec with BeforeAndAfterAll with Be
           "-w",
           pkg,
           "-C",
-          classOf[ScalaTestListener].getCanonicalName
+          classOf[ScalaTestListener].getName
           //        "-oN"
         )
       )
