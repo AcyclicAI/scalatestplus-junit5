@@ -9,7 +9,7 @@ organization := "ai.acyclic.scalatestplus"
 versionScheme := Some("semver-spec")
 
 version := "3.3.0.0"
-isSnapshot := true
+isSnapshot := false
 
 homepage := Some(url("https://github.com/acyclic-ai/scalatestplus-junit"))
 
