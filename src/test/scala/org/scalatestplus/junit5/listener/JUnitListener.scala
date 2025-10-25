@@ -1,9 +1,9 @@
-package org.scalatestplus.junit5.integration.listener
+package org.scalatestplus.junit5.listener
 
 import org.junit.platform.engine.TestExecutionResult
 import org.junit.platform.launcher.{TestExecutionListener, TestIdentifier}
 
-object JUnitListener extends ExecutionOrder {}
+object JUnitListener extends Listener {}
 
 class JUnitListener extends TestExecutionListener {
   import JUnitListener._

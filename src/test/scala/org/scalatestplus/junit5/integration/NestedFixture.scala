@@ -15,7 +15,7 @@ object NestedFixture {
 }
 class NestedFixture extends AnyFunSpec {
 
-  val i2 = new NestedFixture.Inner {
+  val i2: NestedFixture.Inner = new NestedFixture.Inner {
     override def suiteName: String = "i2"
   }
 

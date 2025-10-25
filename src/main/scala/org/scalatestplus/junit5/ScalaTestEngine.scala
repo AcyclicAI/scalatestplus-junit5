@@ -77,13 +77,16 @@ class ScalaTestEngine extends org.junit.platform.engine.TestEngine {
           def test(t: Class[_]): Boolean = {
             val isSuite = classOf[org.scalatest.Suite].isAssignableFrom(t)
             val notAbstract = !Modifier.isAbstract(t.getModifiers)
-            val notObject =
-              !t.getCanonicalName.endsWith("$") // must not be an object
+            val notObject = !t.getName.endsWith("$") // must not be an object
 
             val notInner = t.getEnclosingClass == null
             val canInit = JUnitHelper.checkForPublicNoArgConstructor(t)
 
-            isSuite && notAbstract && notObject && notInner && canInit
+            isSuite &&
+            notAbstract &&
+            notObject &&
+            notInner &&
+            canInit
           }
         }
 

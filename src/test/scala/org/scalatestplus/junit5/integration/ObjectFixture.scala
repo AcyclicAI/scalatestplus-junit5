@@ -1,9 +1,8 @@
 package org.scalatestplus.junit5.integration
 
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.junit5.listener
 
-class PlainFixture extends AnyFunSpec {
+object ObjectFixture extends AnyFunSpec {
 
   it("a") {}
 

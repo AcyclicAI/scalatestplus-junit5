@@ -1,10 +1,10 @@
 package org.scalatestplus.junit5
 
-import org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
+import org.junit.platform.engine.discovery.DiscoverySelectors.{selectClass, selectPackage}
 import org.junit.platform.launcher.core.{LauncherDiscoveryRequestBuilder, LauncherFactory}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite, funspec}
-import org.scalatestplus.junit5.integration.listener.{JUnitListener, ScalaTestListener}
 import org.scalatestplus.junit5.integration.NestedFixture
+import listener.{JUnitListener, ScalaTestListener}
 
 import java.lang.reflect.Modifier
 import java.nio.file.{Files, Path, Paths}
@@ -24,22 +24,37 @@ class IntegrationTests extends funspec.AnyFunSpec with BeforeAndAfterAll with Be
     scalaTestEngineProperty.foreach(System.setProperty("org.scalatestplus.junit5.ScalaTestEngine.disabled", _))
   }
 
-  lazy val integrationDirPath: Path = {
-    val classPathRoot = this.getClass.getProtectionDomain.getCodeSource.getLocation
+  val classPathRoot: Path = Paths.get(this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI)
 
-    val root = Paths.get(classPathRoot.toURI)
+  lazy val integrationDir: Path = {
 
-    val result = root.resolve("org/scalatestplus/junit5/integration")
+    def resolveIntegrationDir(root: Path) = {
 
-    println(s"integration path set to $result")
-    result
+      val result = root.resolve("org/scalatestplus/junit5/integration")
+
+      println(s"integration path set to $result")
+      result
+    }
+
+    resolveIntegrationDir(classPathRoot)
   }
 
-  private def findTestClasses(path: Path): Set[Class[_]] = {
+  lazy val integrationClasspath: Path = {
+    val classPathRoot = Paths.get(this.getClass.getProtectionDomain.getCodeSource.getLocation.toURI)
+    // Returns the classpath root: either a directory containing .class files or a .jar file
+    classPathRoot
+  }
+
+  private def findTopLevelTestClasses(path: Path): Set[Class[_]] = {
     val suiteClass = classOf[Suite]
 
-    def isTestClass(cls: Class[_]): Boolean = {
-      suiteClass.isAssignableFrom(cls) && !Modifier.isAbstract(cls.getModifiers) && !cls.isInterface
+    def isQualified(cls: Class[_]): Boolean = {
+
+      val isSuite = suiteClass.isAssignableFrom(cls)
+      val isConcrete = !Modifier.isAbstract(cls.getModifiers) && !cls.isInterface
+      val notInner = cls.getEnclosingClass == null
+
+      isSuite && isConcrete && notInner
     }
 
     val classPathRoot = Paths.get(getClass.getProtectionDomain.getCodeSource.getLocation.toURI)
@@ -69,14 +84,11 @@ class IntegrationTests extends funspec.AnyFunSpec with BeforeAndAfterAll with Be
     }
 
     classNames
-      .filterNot { name =>
-        name.contains("$")
-      }
       .flatMap { className =>
         try {
           val classLoader = getClass.getClassLoader
           val cls = Class.forName(className, false, classLoader)
-          val result: Option[Class[_]] = Some(cls).filter(isTestClass)
+          val result: Option[Class[_]] = Some(cls).filter(isQualified)
           result
         } catch {
           case _: Throwable => None
@@ -84,36 +96,35 @@ class IntegrationTests extends funspec.AnyFunSpec with BeforeAndAfterAll with Be
       }
   }
 
-  lazy val integrationTests: Set[Class[_]] = findTestClasses(integrationDirPath);
+  lazy val integrationTestClasses: Set[(Class[_], Int)] = findTopLevelTestClasses(integrationDir).zipWithIndex
 
   override def beforeEach(): Unit = {
     ScalaTestListener.clear()
     JUnitListener.clear()
   }
 
-  describe("ScalaTest runner and JUnit runner should discovery & run identical tests") {
+  describe("ScalaTest & JUnit runners should discovery & run identical tests") {
 
-    describe("in classes") {
+    describe("in class") {
 
-      integrationTests.foreach { clz =>
+      integrationTestClasses.foreach { case (clz, i) =>
         val clzName = clz.getName
-        it(s"${clz.getSimpleName}") {
+        it(s"[$i] ${clzName}") {
 
-          // with ScalaTest runner
-
+          // ScalaTest runner
           org.scalatest.tools.Runner.run(
             Array(
               "-R",
-              integrationDirPath.toString,
+              classPathRoot.toString,
               "-s",
               clzName,
               "-C",
-              classOf[ScalaTestListener].getCanonicalName
+              classOf[ScalaTestListener].getName
               //            "-oN"
             )
           )
 
-          // with JUnit 5 runner
+          // JUnit 5 runner
           {
             val launcher = LauncherFactory.create()
 
@@ -126,27 +137,129 @@ class IntegrationTests extends funspec.AnyFunSpec with BeforeAndAfterAll with Be
             launcher.execute(discoveryRequest, new JUnitListener())
           }
 
-          JUnitListener.startedShouldBe(ScalaTestListener.started.mkString("\n"))
-          JUnitListener.finishedShouldBe(ScalaTestListener.finished.mkString("\n"))
+          JUnitListener.started.shouldBe(ScalaTestListener.started)
+          JUnitListener.finished.shouldBe(ScalaTestListener.finished)
         }
       }
     }
 
-    ignore("in packages") { // TODO this doesn't work
+    describe("in class (-R integrationDir)") {
 
-      val pkg = classOf[NestedFixture].getPackage.getName
-      org.scalatest.tools.Runner.run(
-        Array(
-          "-R",
-          integrationDirPath.toString,
-          "-w",
-          pkg,
-          "-C",
-          classOf[ScalaTestListener].getCanonicalName
-          //        "-oN"
-        )
-      )
+      integrationTestClasses.foreach { case (clz, i) =>
+        val clzName = clz.getName
+        it(s"[$i] ${clz.getName}") {
+
+          // ScalaTest runner
+          org.scalatest.tools.Runner.run(
+            Array(
+              "-R",
+              integrationDir.toString,
+              "-s",
+              clzName,
+              "-C",
+              classOf[ScalaTestListener].getName
+              //            "-oN"
+            )
+          )
+
+          // JUnit 5 runner
+          {
+            val launcher = LauncherFactory.create()
+
+            val discoveryRequest = LauncherDiscoveryRequestBuilder.request
+              .selectors(
+                selectClass(clzName)
+              )
+              .build()
+
+            launcher.execute(discoveryRequest, new JUnitListener())
+          }
+
+          JUnitListener.started.shouldBe(ScalaTestListener.started)
+          JUnitListener.finished.shouldBe(ScalaTestListener.finished)
+        }
+      }
+    }
+
+    ignore("in package") {
+      // TODO: wait for https://github.com/scalatest/scalatest/issues/2405
+
+      val pkgNames = Seq(classOf[NestedFixture].getPackage.getName)
+
+      pkgNames.foreach { pkg =>
+        it(pkg) {
+
+          // ScalaTest runner
+          org.scalatest.tools.Runner.run(
+            Array(
+              "-R",
+              classPathRoot.toString,
+              "-w",
+              pkg,
+              "-C",
+              classOf[ScalaTestListener].getName
+              //        "-oN"
+            )
+          )
+
+          // JUnit 5 runner
+          {
+            val launcher = LauncherFactory.create()
+
+            val discoveryRequest = LauncherDiscoveryRequestBuilder.request
+              .selectors(
+                selectPackage(pkg)
+              )
+              .build()
+
+            launcher.execute(discoveryRequest, new JUnitListener())
+          }
+
+          JUnitListener.started.shouldBe(ScalaTestListener.started)
+          JUnitListener.finished.shouldBe(ScalaTestListener.finished)
+        }
+      }
+    }
+
+    ignore("in package (-R integrationDir)") {
+      // TODO: not working, should be a bug of scalatest runner
+      //  wait for https://github.com/scalatest/scalatest/issues/2406
+
+      val pkgNames = Seq(classOf[NestedFixture].getPackage.getName)
+
+      pkgNames.foreach { pkg =>
+        it(pkg) {
+
+          // ScalaTest runner
+          org.scalatest.tools.Runner.run(
+            Array(
+              "-R",
+              integrationDir.toString,
+              "-w",
+              pkg,
+              "-C",
+              classOf[ScalaTestListener].getName
+              //        "-oN"
+            )
+          )
+
+          // JUnit 5 runner
+          {
+            val launcher = LauncherFactory.create()
+
+            val discoveryRequest = LauncherDiscoveryRequestBuilder.request
+              .selectors(
+                selectPackage(pkg)
+              )
+              .build()
+
+            launcher.execute(discoveryRequest, new JUnitListener())
+          }
+
+          JUnitListener.started.shouldBe(ScalaTestListener.started)
+          JUnitListener.finished.shouldBe(ScalaTestListener.finished)
+        }
+      }
     }
   }
-
 }

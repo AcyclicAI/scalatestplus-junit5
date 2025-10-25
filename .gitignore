@@ -11,3 +11,5 @@ bin/
 .gradle/
 .metals/
 .bloop/
+
+.claude.json

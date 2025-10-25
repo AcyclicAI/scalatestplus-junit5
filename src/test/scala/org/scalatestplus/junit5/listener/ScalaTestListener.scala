@@ -1,10 +1,10 @@
-package org.scalatestplus.junit5.integration.listener
+package org.scalatestplus.junit5.listener
 
 import org.junit.platform.engine.TestExecutionResult
 import org.scalatest.Reporter
 import org.scalatest.events._
 
-object ScalaTestListener extends ExecutionOrder {
+object ScalaTestListener extends Listener {
 
   case class IR(
       suiteClassName: Option[String],

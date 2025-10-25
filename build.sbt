@@ -1,5 +1,5 @@
 import java.io.PrintWriter
-import scala.collection.immutable.Seq
+import scala.collection.immutable.*
 import scala.io.Source
 
 name := "junit-5.13"
@@ -8,8 +8,8 @@ organization := "ai.acyclic.scalatestplus"
 
 versionScheme := Some("semver-spec")
 
-version := "3.2.19.1"
-isSnapshot := false
+version := "3.2.19.2"
+isSnapshot := true
 
 homepage := Some(url("https://github.com/acyclic-ai/scalatestplus-junit"))
 
@@ -30,12 +30,12 @@ developers := List(
   )
 )
 
-scalaVersion := "2.13.15"
+scalaVersion := "2.13.16"
 
 crossScalaVersions := List(
   "2.11.12",
   "2.12.20",
-  "2.13.16",
+  scalaVersion.value,
   "3.3.6",
   "3.7.1"
 )
