@@ -51,7 +51,7 @@ Compile / unmanagedSourceDirectories ++= {
   }
 }
 
-val scalatestVersion = "3.2.19"
+val scalatestVersion = "3.3.0-alpha.2"
 val junitVersion = "5.13.1"
 val junitEngineVersion = "1.13.1"
 
